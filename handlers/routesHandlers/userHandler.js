@@ -137,36 +137,55 @@ handler._users.put = (requestedProperties, callback) => {
 
         if (firstName || lastName || password) {
 
-            data.read('users', phone, (err, userData) => {
 
-                const updatedData = { ...parsedJSON(userData) }
+            let token = typeof (requestedProperties.headerObject.token) === 'string'
+                ? requestedProperties.headerObject.token : false;
 
-                if (!err && updatedData) {
-                    if (firstName) {
-                        updatedData.firstName = firstName
-                    };
+            tokenHandler._token.verify(token, phone, (tokenId) => {
+                if (tokenId) {
+                    data.read('users', phone, (err, userData) => {
 
-                    if (lastName) {
-                        updatedData.lastName = lastName
-                    }
+                        const updatedData = { ...parsedJSON(userData) }
 
-                    if (password) {
-                        userData.password = hash(password)
-                    }
+                        if (!err && updatedData) {
+                            if (firstName) {
+                                updatedData.firstName = firstName
+                            };
 
-                    data.update('users', phone, updatedData, (err) => {
-                        if (!err) {
-                            callback(200, {
-                                error: 'Data updated successfully.'
-                            })
-                        } else {
-                            callback(500, {
-                                error: 'Server side error.'
+                            if (lastName) {
+                                updatedData.lastName = lastName
+                            }
+
+                            if (password) {
+                                userData.password = hash(password)
+                            }
+
+                            data.update('users', phone, updatedData, (err) => {
+                                if (!err) {
+                                    callback(200, {
+                                        error: 'Data updated successfully.'
+                                    })
+                                } else {
+                                    callback(500, {
+                                        error: 'Server side error.'
+                                    })
+                                }
                             })
                         }
                     })
+
+                } else {
+                    callback(403, {
+                        error: 'Authentication failed'
+                    })
                 }
             })
+
+
+
+
+
+
 
         } else {
             callback(400, {
@@ -188,12 +207,25 @@ handler._users.delete = (requestedProperties, callback) => {
         requestedProperties.queryStringObject.phone : false;
 
     if (phone) {
-        data.read('users', phone, (err, userData) => {
-            if (!err && userData) {
-                data.delete('users', phone, (err) => {
-                    if (!err) {
-                        callback(500, {
-                            message: 'deleted successfully.'
+
+
+        let token = typeof (requestedProperties.headerObject.token) === 'string'
+            ? requestedProperties.headerObject.token : false;
+
+        tokenHandler._token.verify(token, phone, (tokenId) => {
+            if (tokenId) {
+                data.read('users', phone, (err, userData) => {
+                    if (!err && userData) {
+                        data.delete('users', phone, (err) => {
+                            if (!err) {
+                                callback(500, {
+                                    message: 'deleted successfully.'
+                                })
+                            } else {
+                                callback(500, {
+                                    error: 'Server side error.'
+                                })
+                            }
                         })
                     } else {
                         callback(500, {
@@ -202,11 +234,15 @@ handler._users.delete = (requestedProperties, callback) => {
                     }
                 })
             } else {
-                callback(500, {
-                    error: 'Server side error.'
+                callback(403, {
+                    error: 'Authentication failed'
                 })
             }
         })
+
+
+
+
     } else {
         callback(400, {
             error: 'invalid phone number.Please try again.'
