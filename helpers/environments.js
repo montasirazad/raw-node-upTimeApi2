@@ -2,17 +2,27 @@ const environments = {};
 
 
 environments.staging = {
-    port: 7000,
+    port: 8000,
     envName: 'staging',
     secretKey: 'stage',
-    maxChecks: 5
+    maxChecks: 5,
+    twilio: {
+        fromPhone: '+16292183529',
+        accountSid: 'ACb1d51ce9bf4ccfb4a9b24693017bf22f',
+        authToken: 'ede58328aba60e19e9534e16e127edc9'
+    }
 };
 
 environments.production = {
     port: 5000,
     envName: 'production',
     secretKey: 'production',
-    maxChecks: 5
+    maxChecks: 5,
+    twilio: {
+        fromPhone: '+16292183529',
+        accountSid: 'ACb1d51ce9bf4ccfb4a9b24693017bf22f',
+        authToken: 'ede58328aba60e19e9534e16e127edc9'
+    }
 }
 
 
